@@ -1,0 +1,41 @@
+Mis conclusiones del Benchmark: ¿Cómo ha rendido el sistema?
+Después de añadir 500.000 partículas en nuestra "Smart Grid", esto es lo que he sacado en claro:
+
+¿Funciona el paralelismo? Sí, y se nota: Al pasar de 1 a 4 hilos, el tiempo de ejecución baja muchísimo. El "Speedup" que me sale es casi el ideal, lo que demuestra que la lógica de la clase Tarea se puede dividir perfectamente para trabajar en paralelo sin problemas.
+
+Ojo con la Ley de Amdahl: He visto que al subir a 8 hilos la eficiencia empieza a caer un poquito. Es normal, porque al final el ordenador pierde algo de tiempo gestionando tantos hilos y juntando los resultados de los CompletableFuture (lo que llamamos "overhead").
+
+El sistema no "peta" con los errores: Una de las mejores cosas es que el bloque try-catch para la división por cero en la clase Tarea funciona de lujo. Aunque había distancias nulas, el programa las ha contado, las ha sacado por la terminal y ha seguido calculando el resto de partículas como si nada, sin colgarse.
+
+Mi recomendación: Para este equipo, lo mejor es usar 4 hilos. Es el punto donde el programa va más rápido sin desperdiciar recursos del sistema, aprovechando al máximo el hardware que tenemos.
+
+
+
+
+Explicación técnica del proyecto: Central de Energía Inteligente
+En este proyecto he desarrollado un software de benchmark para analizar el rendimiento del cálculo de energía gravitatoria de forma secuencial frente a una ejecución paralela. Estos son los pilares de mi implementación:
+
+1. Arquitectura Basada en Inversión de Control (IoC)
+He organizado el código de forma modular usando anotaciones como @Component, @Service y @Configuration.
+
+Esto permite que Spring gestione el ciclo de vida de los objetos y los inyecte automáticamente mediante @Autowired, lo que hace que el código sea mucho más limpio y fácil de mantener.
+
+2. Gestión Profesional de Hilos (Multi-threading)
+En lugar de crear hilos manualmente, he configurado un Pool de Hilos (ExecutorService) en la clase ThreadConfig.
+
+Esto es fundamental en sistemas reales como una Smart Grid, ya que reutilizamos los hilos para no saturar la CPU y optimizar el consumo de recursos.
+
+3. Paralelismo con CompletableFuture
+Para el cálculo pesado, he usado CompletableFuture.supplyAsync().
+
+La lógica clave está en el reparto de carga: divido el número total de partículas entre los hilos disponibles, de forma que cada núcleo del procesador trabaje al mismo tiempo en una parte del problema. Luego, recojo los resultados con .join() y los sumo todos.
+
+4. Robustez y Control de Errores
+He implementado un control de excepciones específico (ArithmeticException) dentro de la clase Tarea.
+
+Si el sistema detecta una distancia nula (división por cero), el programa no se detiene ni se cuelga; simplemente ignora esa partícula conflictiva y sigue procesando el resto, garantizando que el servicio de la central eléctrica sea continuo.
+
+5. Análisis de Rendimiento (Benchmark)
+He configurado un CommandLineRunner en EnergyApplication para que el análisis de Speedup y Eficiencia se ejecute automáticamente al arrancar.
+
+Esto me permite comparar cuánto tiempo ahorramos al usar paralelismo y verificar que, aunque el Speedup sube con más hilos, la eficiencia puede bajar ligeramente debido al coste de gestión de los mismos (Ley de Amdahl).

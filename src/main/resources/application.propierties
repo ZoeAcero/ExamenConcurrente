@@ -1,0 +1,5 @@
+# Mínima configuración para un benchmark limpio en terminal
+spring.application.name=ExamenConcurrente
+
+# Evita que salgan demasiados mensajes de texto innecesarios en la consola
+logging.level.org.springframework=WARN
